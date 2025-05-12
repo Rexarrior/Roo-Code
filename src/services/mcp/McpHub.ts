@@ -1297,7 +1297,7 @@ export class McpHub {
 		serverName: string,
 		source: "global" | "project",
 		toolName: string,
-		isEnabled: boolean, // True if tool should be included in prompt, false otherwise
+		isEnabled: boolean,
 	): Promise<void> {
 		try {
 			const connection = this.findConnection(serverName, source)

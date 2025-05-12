@@ -51,12 +51,11 @@ const McpToolRow = ({ tool, serverName, serverSource, alwaysAllowMcp }: McpToolR
 				<div className="flex items-center space-x-4">
 					{" "}
 					{/* Wrapper for checkboxes */}
-					{serverName /* Assuming this checkbox should always be visible if serverName is present */ && (
+					{serverName && (
 						<div
 							role="switch"
 							aria-checked={tool.enabledForPrompt}
 							className={`flex items-center cursor-pointer rounded-full w-8 h-4 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-								// Added flex items-center, changed w-10 h-5 to w-8 h-4
 								tool.enabledForPrompt ? "bg-blue-600" : "bg-gray-200 dark:bg-gray-700"
 							}`}
 							onClick={handleEnabledForPromptChange}
@@ -64,8 +63,7 @@ const McpToolRow = ({ tool, serverName, serverSource, alwaysAllowMcp }: McpToolR
 							title={t("mcp:tool.togglePromptInclusion")}>
 							<span
 								className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow-lg ring-0 transition-transform duration-200 ease-in-out ${
-									// Changed h-4 w-4 to h-3 w-3
-									tool.enabledForPrompt ? "translate-x-4" : "translate-x-1" // Changed translate-x-5 to translate-x-4
+									tool.enabledForPrompt ? "translate-x-4" : "translate-x-1"
 								}`}
 							/>
 						</div>
