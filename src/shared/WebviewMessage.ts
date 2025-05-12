@@ -75,6 +75,7 @@ export interface WebviewMessage {
 		| "openProjectMcpSettings"
 		| "restartMcpServer"
 		| "toggleToolAlwaysAllow"
+		| "toggleToolEnabledForPrompt"
 		| "toggleMcpServer"
 		| "updateMcpTimeout"
 		| "fuzzyMatchThreshold"
@@ -143,6 +144,7 @@ export interface WebviewMessage {
 	serverName?: string
 	toolName?: string
 	alwaysAllow?: boolean
+	isEnabled?: boolean // New property for toggleToolEnabledForPrompt
 	mode?: Mode
 	promptMode?: PromptMode
 	customPrompt?: PromptComponent
