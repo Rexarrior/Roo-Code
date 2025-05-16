@@ -174,6 +174,27 @@ const getCommandsMap = ({ context, outputChannel, provider }: RegisterCommandOpt
 
 			visibleProvider.postMessageToWebview({ type: "acceptInput" })
 		},
+		"roo-cline.importSettings": async () => {
+			const visibleProvider = getVisibleProviderOrLog(outputChannel)
+
+			if (!visibleProvider) {
+				return
+			}
+
+			const { importSettings } = await import("../core/config/importExport")
+
+			const result = await importSettings({
+				providerSettingsManager: visibleProvider.providerSettingsManager,
+				contextProxy: visibleProvider.contextProxy,
+				customModesManager: visibleProvider.customModesManager,
+			})
+
+			if (result.success) {
+				vscode.window.showInformationMessage("Settings imported successfully.")
+			} else {
+				vscode.window.showErrorMessage(`Failed to import settings: ${result.error}`)
+			}
+		},
 	}
 }
 

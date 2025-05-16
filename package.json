@@ -169,6 +169,11 @@
 				"command": "roo.acceptInput",
 				"title": "%command.acceptInput.title%",
 				"category": "%configuration.title%"
+			},
+			{
+				"command": "roo-cline.importSettings",
+				"title": "%command.importSettings.title%",
+				"category": "%configuration.title%"
 			}
 		],
 		"menus": {
