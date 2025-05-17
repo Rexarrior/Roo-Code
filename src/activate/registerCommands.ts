@@ -174,7 +174,7 @@ const getCommandsMap = ({ context, outputChannel, provider }: RegisterCommandOpt
 
 			visibleProvider.postMessageToWebview({ type: "acceptInput" })
 		},
-		"roo-cline.importSettings": async () => {
+		"roo-cline.importSettings": async (filePath?: string) => {
 			const visibleProvider = getVisibleProviderOrLog(outputChannel)
 
 			if (!visibleProvider) {
@@ -183,10 +183,16 @@ const getCommandsMap = ({ context, outputChannel, provider }: RegisterCommandOpt
 
 			const { importSettings } = await import("../core/config/importExport")
 
+			let uri: vscode.Uri | undefined
+			if (filePath) {
+				uri = vscode.Uri.file(filePath)
+			}
+
 			const result = await importSettings({
 				providerSettingsManager: visibleProvider.providerSettingsManager,
 				contextProxy: visibleProvider.contextProxy,
 				customModesManager: visibleProvider.customModesManager,
+				uri: uri,
 			})
 
 			if (result.success) {

@@ -16,6 +16,7 @@ type ImportOptions = {
 	providerSettingsManager: ProviderSettingsManager
 	contextProxy: ContextProxy
 	customModesManager: CustomModesManager
+	uri?: vscode.Uri // Add optional uri parameter
 }
 
 type ExportOptions = {
@@ -23,14 +24,26 @@ type ExportOptions = {
 	contextProxy: ContextProxy
 }
 
-export const importSettings = async ({ providerSettingsManager, contextProxy, customModesManager }: ImportOptions) => {
-	const uris = await vscode.window.showOpenDialog({
-		filters: { JSON: ["json"] },
-		canSelectMany: false,
-	})
+export const importSettings = async ({
+	providerSettingsManager,
+	contextProxy,
+	customModesManager,
+	uri,
+}: ImportOptions) => {
+	let fileUri: vscode.Uri | undefined = uri
 
-	if (!uris) {
-		return { success: false }
+	if (!fileUri) {
+		const uris = await vscode.window.showOpenDialog({
+			filters: { JSON: ["json"] },
+			canSelectMany: false,
+		})
+		if (uris && uris.length > 0) {
+			fileUri = uris[0]
+		}
+	}
+
+	if (!fileUri) {
+		return { success: false, error: "No file selected or provided." }
 	}
 
 	const schema = z.object({
@@ -41,7 +54,7 @@ export const importSettings = async ({ providerSettingsManager, contextProxy, cu
 	try {
 		const previousProviderProfiles = await providerSettingsManager.export()
 
-		const data = JSON.parse(await fs.readFile(uris[0].fsPath, "utf-8"))
+		const data = JSON.parse(await fs.readFile(fileUri.fsPath, "utf-8"))
 		const { providerProfiles: newProviderProfiles, globalSettings = {} } = schema.parse(data)
 
 		const providerProfiles = {
