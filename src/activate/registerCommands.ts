@@ -4,6 +4,8 @@ import delay from "delay"
 import { ClineProvider } from "../core/webview/ClineProvider"
 import { ContextProxy } from "../core/config/ContextProxy"
 import { telemetryService } from "../services/telemetry/TelemetryService"
+import { ProviderSettingsManager } from "../core/config/ProviderSettingsManager"
+import { CustomModesManager } from "../core/config/CustomModesManager"
 
 import { registerHumanRelayCallback, unregisterHumanRelayCallback, handleHumanRelayResponse } from "./humanRelay"
 import { handleNewTask } from "./handleTask"
@@ -175,23 +177,36 @@ const getCommandsMap = ({ context, outputChannel, provider }: RegisterCommandOpt
 			visibleProvider.postMessageToWebview({ type: "acceptInput" })
 		},
 		"roo-cline.importSettings": async (filePath?: string) => {
-			const visibleProvider = getVisibleProviderOrLog(outputChannel)
-
-			if (!visibleProvider) {
-				return
-			}
-
 			const { importSettings } = await import("../core/config/importExport")
 
 			let uri: vscode.Uri | undefined
+			let providerSettingsManager: ProviderSettingsManager
+			let contextProxy: ContextProxy
+			let customModesManager: CustomModesManager
+
 			if (filePath) {
 				uri = vscode.Uri.file(filePath)
+				// Get instances without relying on a visible provider
+				contextProxy = await ContextProxy.getInstance(context)
+				providerSettingsManager = new ProviderSettingsManager(context)
+				customModesManager = new CustomModesManager(context, async () => {
+					// No-op for non-UI triggered import
+				})
+			} else {
+				const visibleProvider = getVisibleProviderOrLog(outputChannel)
+
+				if (!visibleProvider) {
+					return
+				}
+				providerSettingsManager = visibleProvider.providerSettingsManager
+				contextProxy = visibleProvider.contextProxy
+				customModesManager = visibleProvider.customModesManager
 			}
 
 			const result = await importSettings({
-				providerSettingsManager: visibleProvider.providerSettingsManager,
-				contextProxy: visibleProvider.contextProxy,
-				customModesManager: visibleProvider.customModesManager,
+				providerSettingsManager,
+				contextProxy,
+				customModesManager,
 				uri: uri,
 			})
 
