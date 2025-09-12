@@ -52,6 +52,7 @@ import { initializeI18n } from "./i18n"
 let outputChannel: vscode.OutputChannel
 let extensionContext: vscode.ExtensionContext
 let cloudService: CloudService | undefined
+let apiInstance: any
 
 let authStateChangedHandler: ((data: { state: AuthState; previousState: AuthState }) => Promise<void>) | undefined
 let settingsUpdatedHandler: (() => void) | undefined
@@ -325,7 +326,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		})
 	}
 
-	return new API(outputChannel, provider, socketPath, enableLogging)
+	apiInstance = new API(outputChannel, provider, socketPath, enableLogging)
+	return apiInstance
 }
 
 // This method is called when your extension is deactivated.
@@ -363,4 +365,16 @@ export async function deactivate() {
 	await McpServerManager.cleanup(extensionContext)
 	TelemetryService.instance.shutdown()
 	TerminalRegistry.cleanup()
+
+	// Stop HTTP server if running
+	if (apiInstance && typeof apiInstance.stopHttpServer === "function") {
+		try {
+			await apiInstance.stopHttpServer()
+			outputChannel.appendLine("HTTP server stopped")
+		} catch (error) {
+			outputChannel.appendLine(
+				`Failed to stop HTTP server: ${error instanceof Error ? error.message : String(error)}`,
+			)
+		}
+	}
 }

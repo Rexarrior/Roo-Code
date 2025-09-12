@@ -24,12 +24,16 @@ import { IpcServer } from "@roo-code/ipc"
 import { Package } from "../shared/package"
 import { ClineProvider } from "../core/webview/ClineProvider"
 import { openClineInNewTab } from "../activate/registerCommands"
+import { HttpServer, HttpServerConfig } from "../core/external/httpServer"
+import { MarketplaceManager } from "../services/marketplace"
 
 export class API extends EventEmitter<RooCodeEvents> implements RooCodeAPI {
 	private readonly outputChannel: vscode.OutputChannel
 	private readonly sidebarProvider: ClineProvider
 	private readonly context: vscode.ExtensionContext
 	private readonly ipc?: IpcServer
+	private readonly httpServer?: HttpServer
+	private readonly marketplaceManager: MarketplaceManager
 	private readonly taskMap = new Map<string, ClineProvider>()
 	private readonly log: (...args: unknown[]) => void
 	private logfile?: string
@@ -45,6 +49,7 @@ export class API extends EventEmitter<RooCodeEvents> implements RooCodeAPI {
 		this.outputChannel = outputChannel
 		this.sidebarProvider = provider
 		this.context = provider.context
+		this.marketplaceManager = new MarketplaceManager(provider.context, provider.customModesManager)
 
 		if (enableLogging) {
 			this.log = (...args: unknown[]) => {
@@ -94,6 +99,9 @@ export class API extends EventEmitter<RooCodeEvents> implements RooCodeAPI {
 				}
 			})
 		}
+
+		// Initialize HTTP server if enabled
+		this.initializeHttpServer()
 	}
 
 	public override emit<K extends keyof RooCodeEvents>(
@@ -442,5 +450,51 @@ export class API extends EventEmitter<RooCodeEvents> implements RooCodeAPI {
 
 		await this.sidebarProvider.activateProviderProfile({ name })
 		return this.getActiveProfile()
+	}
+
+	// HTTP Server Management
+
+	private async initializeHttpServer() {
+		try {
+			const config = vscode.workspace.getConfiguration(Package.name)
+			const httpEnabled = config.get<boolean>("externalInterface.enabled", false)
+			const httpPort = config.get<number>("externalInterface.port", 8080)
+			const httpHost = config.get<string>("externalInterface.host", "localhost")
+			const apiKey = config.get<string>("externalInterface.apiKey", "")
+
+			if (httpEnabled) {
+				const httpConfig: HttpServerConfig = {
+					enabled: true,
+					port: httpPort,
+					host: httpHost,
+					apiKey: apiKey || undefined,
+				}
+
+				const httpServer = new HttpServer(httpConfig, this.sidebarProvider, this.marketplaceManager)
+				await httpServer.start()
+				;(this as any).httpServer = httpServer
+
+				this.log(`[API] HTTP server started on ${httpServer.address}`)
+			}
+		} catch (error) {
+			this.log(
+				`[API] Failed to initialize HTTP server: ${error instanceof Error ? error.message : String(error)}`,
+			)
+		}
+	}
+
+	public async stopHttpServer() {
+		if (this.httpServer) {
+			await this.httpServer.stop()
+			this.log("[API] HTTP server stopped")
+		}
+	}
+
+	public getHttpServerAddress(): string | undefined {
+		return this.httpServer?.address
+	}
+
+	public isHttpServerRunning(): boolean {
+		return this.httpServer?.isRunning || false
 	}
 }

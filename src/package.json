@@ -407,6 +407,28 @@
 					"minimum": 1,
 					"maximum": 200,
 					"description": "%settings.codeIndex.embeddingBatchSize.description%"
+				},
+				"roo-cline.externalInterface.enabled": {
+					"type": "boolean",
+					"default": true,
+					"description": "Enable external HTTP interface for WebviewMessage-like requests"
+				},
+				"roo-cline.externalInterface.port": {
+					"type": "number",
+					"default": 28473,
+					"minimum": 1024,
+					"maximum": 65535,
+					"description": "Port for the external HTTP interface"
+				},
+				"roo-cline.externalInterface.host": {
+					"type": "string",
+					"default": "localhost",
+					"description": "Host address for the external HTTP interface"
+				},
+				"roo-cline.externalInterface.apiKey": {
+					"type": "string",
+					"default": "",
+					"description": "Optional API key for authentication (leave empty to disable)"
 				}
 			}
 		}
