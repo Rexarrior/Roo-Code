@@ -739,6 +739,19 @@ export const webviewMessageHandler = async (
 
 			break
 		}
+		case "importSettingsFromPath": {
+			await importSettingsWithFeedback(
+				{
+					providerSettingsManager: provider.providerSettingsManager,
+					contextProxy: provider.contextProxy,
+					customModesManager: provider.customModesManager,
+					provider: provider,
+				},
+				message.text,
+			)
+
+			break
+		}
 		case "exportSettings":
 			await exportSettings({
 				providerSettingsManager: provider.providerSettingsManager,

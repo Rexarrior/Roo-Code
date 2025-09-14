@@ -62,6 +62,7 @@ export interface WebviewMessage {
 		| "deleteTaskWithId"
 		| "exportTaskWithId"
 		| "importSettings"
+		| "importSettingsFromPath"
 		| "exportSettings"
 		| "resetState"
 		| "flushRouterModels"
