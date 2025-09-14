@@ -8,8 +8,7 @@
  */
 
 const http = require("http")
-
-const API_BASE_URL = "http://localhost:28473"
+const API_PORT = 28473
 
 async function testHealthCheck() {
 	console.log("🔍 Testing health check...")
@@ -18,7 +17,7 @@ async function testHealthCheck() {
 		const req = http.request(
 			{
 				hostname: "localhost",
-				port: 28473,
+				port: API_PORT,
 				path: "/health",
 				method: "GET",
 			},
@@ -61,7 +60,7 @@ async function testMessage(message, description) {
 		const req = http.request(
 			{
 				hostname: "localhost",
-				port: 28473,
+				port: API_PORT,
 				path: "/api/message",
 				method: "POST",
 				headers: {
@@ -130,7 +129,7 @@ async function runTests() {
 		console.log("1. Make sure RooCode extension is installed and active")
 		console.log("2. Enable external interface in VSCode settings:")
 		console.log('   - Set "roo-cline.externalInterface.enabled" to true')
-		console.log('   - Set "roo-cline.externalInterface.port" to 28473')
+		console.log(`   - Set "roo-cline.externalInterface.port" to ${API_PORT}`)
 		console.log("3. Restart VSCode or reload the extension")
 		console.log('4. Check the VSCode output panel for "RooCode" channel')
 	}
